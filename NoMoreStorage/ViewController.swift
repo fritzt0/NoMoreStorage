@@ -73,11 +73,12 @@ class ViewController: UIViewController {
     }
 
     func deviceRemainingFreeSpaceInGBytes() -> Int? {
-        let documentDirectoryPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
-        if let systemAttributes = try? FileManager.default.attributesOfFileSystem(forPath: documentDirectoryPath.last!) {
-            if let freeSize = systemAttributes[FileAttributeKey.systemFreeSize] as? NSNumber {
-                return Int(Double(freeSize.int64Value) / 1_000_000_000.0)
-            }
+        if var documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first,
+           let values = try? documentsURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]),
+           let capacity = values.volumeAvailableCapacityForImportantUsage {
+            // Prevent reuse of a cached value
+            documentsURL.removeCachedResourceValue(forKey: .volumeAvailableCapacityForImportantUsageKey)
+            return Int(Double(capacity) / 1_000_000_000.0)
         }
         // something failed
         return nil
