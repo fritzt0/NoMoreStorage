@@ -39,11 +39,11 @@ class ViewController: UIViewController {
     
     @objc func update() {
         // Check diskstorage.
-        let freeSpaceInMBytes = deviceRemainingFreeSpaceInMBytes()
-        freeStorageLabel.text = "\(freeSpaceInMBytes!)"
+        let freeSpaceInGBytes = deviceRemainingFreeSpaceInGBytes()
+        freeStorageLabel.text = "\(freeSpaceInGBytes!)"
         
         if let aimedFreeSpace = Int(aimedFreeStorage.text!) {
-            if(freeSpaceInMBytes! < aimedFreeSpace) {
+            if(freeSpaceInGBytes! < aimedFreeSpace) {
                 self.writeBullshit = false
             }
         }
@@ -58,9 +58,9 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-    func fillSpace(_ data: Data = Data(bytes:Array<UInt8>(repeating: 1, count: 512_000_000))) {
-        guard data.count > 0  else { return }
-        print("Writing \(data.count) bites...")
+    func fillSpace(_ data: Data = Data(bytes:Array<UInt8>(repeating: 1, count: 1_000_000_000))) {
+        guard data.count > 0, self.writeBullshit else { return }
+        print("Writing \(data.count) bytes...")
         let docsDir = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask, true)[0]
         let destPath = (docsDir as NSString).appendingPathComponent("/alotof_\(NSUUID().uuidString).shit")
 
@@ -72,11 +72,11 @@ class ViewController: UIViewController {
         }
     }
 
-    func deviceRemainingFreeSpaceInMBytes() -> Int? {
+    func deviceRemainingFreeSpaceInGBytes() -> Int? {
         let documentDirectoryPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         if let systemAttributes = try? FileManager.default.attributesOfFileSystem(forPath: documentDirectoryPath.last!) {
             if let freeSize = systemAttributes[FileAttributeKey.systemFreeSize] as? NSNumber {
-                return Int(Double(freeSize.int64Value) / 1000000.0)
+                return Int(Double(freeSize.int64Value) / 1_000_000_000.0)
             }
         }
         // something failed
